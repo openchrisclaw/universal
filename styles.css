@@ -1,0 +1,290 @@
+:root {
+  color-scheme: light;
+  font-family: "Inter", "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  --bg: #f8f8f6;
+  --paper: #ffffff;
+  --text: #1f1f1f;
+  --muted: #7a7a7a;
+  --border: #dedede;
+  --accent: #5b5b5b;
+  --accent-soft: #dcdcdc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 2.5rem 1rem 4rem;
+  min-height: 100vh;
+}
+
+app-shell {
+  display: block;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.app-frame {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--paper);
+  padding: 1.75rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.02);
+}
+
+header.app-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.app-title {
+  font-size: 1.5rem;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.scope-pill {
+  display: inline-flex;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
+  gap: 0.35rem;
+  align-items: center;
+  color: var(--muted);
+}
+
+.range-controls {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.range-controls button {
+  border: 1px solid var(--border);
+  background: transparent;
+  border-radius: 999px;
+  padding: 0.2rem 0.8rem;
+  font-size: 0.85rem;
+  text-transform: lowercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.scope-pill strong {
+  color: var(--text);
+  letter-spacing: 0.04em;
+}
+
+nav.time-nav {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+nav.time-nav button {
+  border: 1px solid var(--border);
+  background: transparent;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+nav.time-nav button.active {
+  background: #f3f3f1;
+  color: var(--text);
+  border-color: var(--accent-soft);
+}
+
+nav.time-nav button:hover {
+  color: var(--text);
+}
+
+.entry-composer {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.entry-composer textarea {
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: vertical;
+  background: transparent;
+  min-height: 90px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--text);
+}
+
+.entry-composer textarea::placeholder {
+  color: var(--muted);
+}
+
+.entry-composer footer {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.entry-composer .controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.entry-composer input[type="date"],
+.entry-composer input[type="time"] {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.35rem 0.5rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  background: transparent;
+  color: var(--text);
+}
+
+.entry-composer button[type="submit"] {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.35rem 1.2rem;
+  background: var(--text);
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: filter 180ms ease;
+}
+
+.entry-composer button[type="submit"]:hover {
+  filter: brightness(1.05);
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.day-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.day-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.35rem;
+}
+
+.day-header h2 {
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  margin: 0;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.day-header button {
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+}
+
+.entry-card {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  background: #fff;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.entry-card:hover {
+  border-color: var(--border);
+  background: #fcfcfc;
+}
+
+.entry-card.highlight {
+  border-color: var(--text);
+}
+
+.entry-card p {
+  margin: 0 0 0.6rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text);
+}
+
+.entry-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--muted);
+  gap: 0.5rem;
+}
+
+.entry-meta button {
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  letter-spacing: 0.05em;
+}
+
+.empty-day {
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 640px) {
+  body {
+    padding: 1.5rem 0.75rem 3rem;
+  }
+
+  .app-frame {
+    padding: 1.25rem;
+  }
+
+  .entry-composer footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .entry-composer .controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
