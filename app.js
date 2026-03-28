@@ -9,6 +9,7 @@ class AppShell extends HTMLElement {
       route: parseHash(window.location.hash, TODAY_KEY),
     };
     this.editingEntryId = null;
+    this.pendingDeleteId = null;
     this.handleHashChange = this.handleHashChange.bind(this);
   }
 
@@ -67,6 +68,7 @@ class AppShell extends HTMLElement {
         ${renderNav(scopeDetails)}
         ${renderComposer(this.state.route, this.state.entries)}
         ${renderTimeline(sections, highlightId, this.editingEntryId)}
+        ${renderDeleteDialog()}
       </div>
     `;
 
@@ -156,12 +158,13 @@ class AppShell extends HTMLElement {
     this.querySelectorAll('[data-entry-delete]').forEach((button) => {
       button.addEventListener('click', () => {
         const id = button.getAttribute('data-entry-delete');
-        const ok = window.confirm('Delete this entry?');
-        if (!ok) return;
-        this.state.entries = this.state.entries.filter((entry) => entry.id !== id);
-        this.persistEntries();
-        if (this.editingEntryId === id) this.editingEntryId = null;
-        this.render();
+        const dialog = this.querySelector('[data-delete-dialog]');
+        if (dialog && typeof dialog.showModal === 'function') {
+          this.pendingDeleteId = id;
+          dialog.showModal();
+        } else {
+          this.deleteEntry(id);
+        }
       });
     });
 
@@ -190,6 +193,31 @@ class AppShell extends HTMLElement {
         this.render();
       });
     });
+
+    const deleteDialog = this.querySelector('[data-delete-dialog]');
+    if (deleteDialog) {
+      const confirmBtn = deleteDialog.querySelector('[data-dialog-confirm]');
+      const cancelBtn = deleteDialog.querySelector('[data-dialog-cancel]');
+      confirmBtn?.addEventListener('click', () => {
+        deleteDialog.close();
+        if (this.pendingDeleteId) {
+          this.deleteEntry(this.pendingDeleteId);
+        }
+      });
+      cancelBtn?.addEventListener('click', () => {
+        deleteDialog.close();
+        this.pendingDeleteId = null;
+      });
+    }
+  }
+
+  deleteEntry(id) {
+    if (!id) return;
+    this.state.entries = this.state.entries.filter((entry) => entry.id !== id);
+    this.persistEntries();
+    if (this.editingEntryId === id) this.editingEntryId = null;
+    this.pendingDeleteId = null;
+    this.render();
   }
 
   setRoute(route) {
@@ -351,6 +379,18 @@ function renderComposer(route, entries) {
 function renderTimeline(sections, highlightId, editingId) {
   const content = sections.map((section) => renderDaySection(section, highlightId, editingId)).join('');
   return `<section class="timeline" aria-live="polite">${content}</section>`;
+}
+
+function renderDeleteDialog() {
+  return `
+    <dialog class="confirm-dialog" data-delete-dialog>
+      <p>Delete this entry? This action can’t be undone.</p>
+      <div class="dialog-actions">
+        <button type="button" data-dialog-cancel>cancel</button>
+        <button type="button" data-dialog-confirm>delete</button>
+      </div>
+    </dialog>
+  `;
 }
 
 function renderDaySection(section, highlightId, editingId) {
