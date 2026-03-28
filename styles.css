@@ -320,22 +320,14 @@ nav.time-nav button:hover {
   gap: 0.5rem;
 }
 
-.entry-meta button {
-  border: none;
-  background: none;
-  color: var(--muted);
-  cursor: pointer;
-  letter-spacing: 0.05em;
-}
-
-.entry-actions {
+.entry-controls {
   display: flex;
   gap: 0.45rem;
-  margin-top: 0.5rem;
   flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
-.entry-actions button {
+.entry-controls button {
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 0.25rem 0.9rem;
@@ -347,7 +339,7 @@ nav.time-nav button:hover {
   cursor: pointer;
 }
 
-.entry-actions button[data-entry-delete] {
+.entry-controls button[data-entry-delete] {
   color: #b54747;
   border-color: rgba(181, 71, 71, 0.4);
 }

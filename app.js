@@ -383,11 +383,11 @@ function renderEntry(entry, highlightId, editingId) {
       <p>${escapeHtml(entry.content)}</p>
       <div class="entry-meta">
         <span>${formatTimeDisplay(new Date(entry.createdAt))}</span>
-        <button data-copy-link="${hash}">share link</button>
-      </div>
-      <div class="entry-actions">
-        <button data-entry-edit="${entry.id}">edit</button>
-        <button data-entry-delete="${entry.id}">delete</button>
+        <div class="entry-controls">
+          <button data-entry-edit="${entry.id}">edit</button>
+          <button data-entry-delete="${entry.id}">delete</button>
+          <button data-copy-link="${hash}">share</button>
+        </div>
       </div>
     </div>
   `;
