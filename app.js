@@ -8,6 +8,7 @@ class AppShell extends HTMLElement {
       entries: [],
       route: parseHash(window.location.hash, TODAY_KEY),
     };
+    this.editingEntryId = null;
     this.handleHashChange = this.handleHashChange.bind(this);
   }
 
@@ -28,6 +29,7 @@ class AppShell extends HTMLElement {
 
   handleHashChange() {
     this.state.route = parseHash(window.location.hash, TODAY_KEY);
+    this.editingEntryId = null;
     this.render();
   }
 
@@ -64,7 +66,7 @@ class AppShell extends HTMLElement {
         ${renderHeader(scopeDetails)}
         ${renderNav(scopeDetails)}
         ${renderComposer(this.state.route, this.state.entries)}
-        ${renderTimeline(sections, highlightId)}
+        ${renderTimeline(sections, highlightId, this.editingEntryId)}
       </div>
     `;
 
@@ -92,6 +94,7 @@ class AppShell extends HTMLElement {
         form.reset();
         form.elements['date'].value = formatDateKey(new Date(timestamp));
         form.elements['time'].value = formatTimeValue(new Date(timestamp));
+        this.editingEntryId = null;
         this.setRoute({ type: 'day', value: formatDateKey(new Date(timestamp)) });
       });
     }
@@ -140,6 +143,51 @@ class AppShell extends HTMLElement {
         } catch (error) {
           console.error('Clipboard failed', error);
         }
+      });
+    });
+
+    this.querySelectorAll('[data-entry-edit]').forEach((button) => {
+      button.addEventListener('click', () => {
+        this.editingEntryId = button.getAttribute('data-entry-edit');
+        this.render();
+      });
+    });
+
+    this.querySelectorAll('[data-entry-delete]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const id = button.getAttribute('data-entry-delete');
+        const ok = window.confirm('Delete this entry?');
+        if (!ok) return;
+        this.state.entries = this.state.entries.filter((entry) => entry.id !== id);
+        this.persistEntries();
+        if (this.editingEntryId === id) this.editingEntryId = null;
+        this.render();
+      });
+    });
+
+    this.querySelectorAll('[data-edit-form]').forEach((editForm) => {
+      editForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const id = editForm.getAttribute('data-entry-id');
+        const formData = new FormData(editForm);
+        const content = (formData.get('content') || '').trim();
+        if (!content) return;
+        const dateValue = formData.get('date');
+        const timeValue = formData.get('time');
+        const timestamp = composeTimestamp(dateValue, timeValue);
+        this.state.entries = this.state.entries
+          .map((entry) => (entry.id === id ? { ...entry, content, createdAt: new Date(timestamp).toISOString() } : entry))
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        this.persistEntries();
+        this.editingEntryId = null;
+        this.setRoute({ type: 'day', value: formatDateKey(new Date(timestamp)) });
+      });
+    });
+
+    this.querySelectorAll('[data-cancel-edit]').forEach((button) => {
+      button.addEventListener('click', () => {
+        this.editingEntryId = null;
+        this.render();
       });
     });
   }
@@ -300,12 +348,12 @@ function renderComposer(route, entries) {
   `;
 }
 
-function renderTimeline(sections, highlightId) {
-  const content = sections.map((section) => renderDaySection(section, highlightId)).join('');
+function renderTimeline(sections, highlightId, editingId) {
+  const content = sections.map((section) => renderDaySection(section, highlightId, editingId)).join('');
   return `<section class="timeline" aria-live="polite">${content}</section>`;
 }
 
-function renderDaySection(section, highlightId) {
+function renderDaySection(section, highlightId, editingId) {
   const date = new Date(section.dateKey);
   const label = formatDayLabel(date);
   const hash = buildHash({ type: 'day', value: section.dateKey });
@@ -315,7 +363,7 @@ function renderDaySection(section, highlightId) {
         <h2>${label}</h2>
         <button data-copy-link="${hash}">share day</button>
       </div>
-      ${section.isEmpty ? renderEmptyDay(section.dateKey) : section.entries.map((entry) => renderEntry(entry, highlightId)).join('')}
+      ${section.isEmpty ? renderEmptyDay(section.dateKey) : section.entries.map((entry) => renderEntry(entry, highlightId, editingId)).join('')}
     </article>
   `;
 }
@@ -324,7 +372,10 @@ function renderEmptyDay(dateKey) {
   return `<div class="empty-day">No entries for ${formatShortDate(dateKey)} yet.</div>`;
 }
 
-function renderEntry(entry, highlightId) {
+function renderEntry(entry, highlightId, editingId) {
+  if (entry.id === editingId) {
+    return renderEntryEditor(entry);
+  }
   const hash = buildHash({ type: 'entry', value: entry.id });
   const isHighlight = entry.id === highlightId;
   return `
@@ -334,6 +385,32 @@ function renderEntry(entry, highlightId) {
         <span>${formatTimeDisplay(new Date(entry.createdAt))}</span>
         <button data-copy-link="${hash}">share link</button>
       </div>
+      <div class="entry-actions">
+        <button data-entry-edit="${entry.id}">edit</button>
+        <button data-entry-delete="${entry.id}">delete</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderEntryEditor(entry) {
+  const dateValue = formatDateKey(new Date(entry.createdAt));
+  const timeValue = formatTimeValue(new Date(entry.createdAt));
+  return `
+    <div class="entry-card editing" id="entry-${entry.id}">
+      <form data-edit-form data-entry-id="${entry.id}">
+        <textarea name="content" required>${escapeHtml(entry.content)}</textarea>
+        <div class="edit-controls">
+          <div class="edit-datetime">
+            <input type="date" name="date" value="${dateValue}" required />
+            <input type="time" name="time" value="${timeValue}" required />
+          </div>
+          <div class="edit-buttons">
+            <button type="submit">save</button>
+            <button type="button" data-cancel-edit>cancel</button>
+          </div>
+        </div>
+      </form>
     </div>
   `;
 }
